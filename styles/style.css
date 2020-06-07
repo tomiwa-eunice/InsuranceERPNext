@@ -9,6 +9,10 @@ body {
     background-color: white;
 }
 
+.bg-light {
+    background-color: white!important;
+}
+
 #container {
     height: 15%;
     color: #4e4e4e;
