@@ -110,11 +110,16 @@ legend.onAdd = function(map) {
             "High"
         ];
 
+    title = ['<strong>POPULATION DENSITY</strong>'];
+
+
     // loop through our density intervals and generate a label with a colored square for each interval
     for (var i = 0; i < categories.length; i++) {
-        legendBox.innerHTML +=
-            `<i style="background: ${riskColour(categories[i])} "></i> ${labels[i]} <br>`;
+        title.push(
+            `<i style="background: ${riskColour(categories[i])} "></i> ${labels[i]}`);
     }
+
+    legendBox.innerHTML = title.join('<br>');
 
     return legendBox;
 };

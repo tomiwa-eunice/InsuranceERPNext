@@ -14,8 +14,60 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
 }).addTo(map);
 
 // group layers
+var claims = L.layerGroup().addTo(map);
 var zones = L.layerGroup().addTo(map);
 
+
+var claimsIcon = L.icon({
+    iconUrl: 'assets/claim.png',
+    iconSize: [32, 37],
+    iconAnchor: [16, 37],
+    popupAnchor: [0, -28]
+});
+
+
+//=========== CLAIMS
+$.getJSON("data/Claims.json", function(data) {
+
+    for (i in data.data) {
+        var jsonClaims = JSON.parse(data.data[i].geoclaim);
+
+        L.geoJSON(jsonClaims, {
+
+            /* pointToLayer: function(feature, latlng) {
+                return L.marker(latlng, { icon: claimsIcon });
+            },
+ */
+            pointToLayer: function(feature, latlng) {
+                return L.circleMarker(latlng, {
+                    radius: 8,
+                    fillColor: "#a900e6",
+                    color: "#fff",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                });
+            },
+            onEachFeature: function(feature, layer) {
+                var popupContent = "<p>Claim " +
+                    feature.geometry.type + "</p>";
+
+                if (feature.properties && feature.properties.popupContent) {
+                    popupContent += feature.properties.popupContent;
+                }
+
+                layer.bindPopup(popupContent);
+
+
+            },
+
+        }).addTo(claims);
+
+    }
+
+
+
+});
 
 
 //=========== ZONES
@@ -51,28 +103,12 @@ $.getJSON("data/Zones.json", function(data) {
 
                 // console.log(feature);
 
-                var popupContent = "<p>ZONE: <b>" +
-                    feature.properties.BU_NAAM +
-                    "</b></p><p>POPULATION(2016): <b>" +
-                    feature.properties.AANT_INW +
-                    "</b></p><p>CLAIM INCIDENCE: <b>" +
-                    feature.properties.Claim_Even +
-                    "</b></p><p>DRIVABLE AGE(15-24)%: <b>" +
-                    feature.properties.P_15_24_JR +
-                    "</b></p><p>DRIVABLE AGE(25-44)%: <b>" +
-                    feature.properties.P_25_44_JR +
-                    "</b></p><p>DRIVABLE AGE(45-64)%: <b>" +
-                    feature.properties.P_45_64_JR +
-                    "</b></p><p>DRIVABLE AGE(65-E0)%: <b>" +
-                    feature.properties.P_65_EO_JR +
-                    "</b></p><p>RISK CATEGORY: <b>" +
-                    feature.properties.Risk_Zones +
-                    "</b></p>";
+                var popupContent = "<p>NAME: " +
+                    feature.properties.BU_NAAM + "</p><p>RISK ZONE:" + feature.properties.Risk_Zones + "</p>";
 
                 if (feature.properties && feature.properties.popupContent) {
                     popupContent += feature.properties.popupContent;
                 }
-
 
                 layer.bindPopup(popupContent);
             },
@@ -90,6 +126,7 @@ $.getJSON("data/Zones.json", function(data) {
 
 // Legend layers control
 var overlays = {
+    "Claims": claims,
     "Risk Zones": zones,
 }
 
@@ -117,17 +154,11 @@ legend.onAdd = function(map) {
             "5. Very High"
         ];
 
-    title = ['<strong>RISK ZONES</strong>'];
-
-
     // loop through our density intervals and generate a label with a colored square for each interval
     for (var i = 0; i < categories.length; i++) {
-        title.push(
-            `<i style="background: ${riskColour(categories[i])} "></i> ${labels[i]}`);
+        legendBox.innerHTML +=
+            `<i style="background: ${riskColour(categories[i])} "></i> ${labels[i]} <br>`;
     }
-
-    legendBox.innerHTML = title.join('<br>');
-
 
     return legendBox;
 };
